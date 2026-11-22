@@ -158,15 +158,30 @@ import json,sys
 cs=[c for c in json.load(sys.stdin).get('components',[]) if c.get('key')==sys.argv[1]]
 print(cs[0]['projectUuid'] if cs else '')" "$KEY")
   [ -n "$UUID" ] || { echo "could not resolve project UUID for $KEY" >&2; exit 1; }
+  # The raw API uses a different shape from the CLI's file format: the array is
+  # called "perspectives" rather than "models", and "type" is "qualifiers". It
+  # accepts an unrecognised key without complaint and stores an EMPTY model, so
+  # getting this wrong looks like success and yields zero deviations.
   python3 -c "
 import json,sys
-m=json.load(open(sys.argv[1]))['models'][0]
-json.dump({'projectId': sys.argv[2], 'model': m}, sys.stdout)" \
+m=dict(json.load(open(sys.argv[1]))['models'][0])
+m['qualifiers'] = m.pop('type')
+json.dump({'projectId': sys.argv[2], 'model': {'perspectives': [m]}}, sys.stdout)" \
     "$REPO_DIR/arch-demo/intended-architecture.json" "$UUID" > /tmp/ia-payload.$$.json
   curl -sSf -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' \
     --data @/tmp/ia-payload.$$.json "$HOST/api/v2/architecture/models" >/dev/null \
     && echo "    intended architecture written"
   rm -f /tmp/ia-payload.$$.json
+  # Read it back: a silently-empty model is the failure mode here.
+  if ! curl -sS -u "$SONAR_TOKEN:" "$HOST/api/v2/architecture/models?projectId=$UUID" \
+       | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+ps=(d[0]['model'] if isinstance(d,list) and d else {}).get('perspectives',[])
+sys.exit(0 if ps and ps[0].get('groups') else 1)"; then
+    echo "    model stored empty - the payload shape was rejected silently" >&2; exit 1
+  fi
+  echo "    verified: model has content"
 fi
 
 scan() { # $1 = git ref, $2 = optional sonar branch name
