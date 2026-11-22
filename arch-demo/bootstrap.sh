@@ -63,6 +63,8 @@ fi
 scan() { # $1 = git ref, $2 = optional sonar branch name
   echo "==> scanning $1"
   git -C "$REPO_DIR" checkout -q "$1"
+  # Guarded expansion: bash 3.2 (macOS) treats "${arr[@]}" on an empty array as
+  # unbound under `set -u`, so main (no branch argument) would abort the run.
   local extra=()
   [ -n "${2:-}" ] && extra=(-Dsonar.branch.name="$2")
   # The plugin version is pinned deliberately: 5.1.x is the one that works against
@@ -77,7 +79,7 @@ scan() { # $1 = git ref, $2 = optional sonar branch name
       -Dsonar.projectName="$NAME" \
       -Dsonar.scanner.sonarcloudUrl="$HOST" \
       -Dsonar.scanner.apiBaseUrl="https://api.sonarcloud.io" \
-      "${extra[@]}" )
+      ${extra[@]+"${extra[@]}"} )
 }
 
 scan main
