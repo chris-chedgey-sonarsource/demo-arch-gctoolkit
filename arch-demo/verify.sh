@@ -2,7 +2,9 @@
 #
 # Check a bootstrapped demo project is actually measuring something.
 #
-#   ./arch-demo/verify.sh <project-key>
+#   ./arch-demo/verify.sh <project-key> [host-url]
+#
+# host-url defaults to SonarQube Cloud; pass http://localhost:9000 for a local server.
 #
 # Exists because the failure mode is silent: a branch that was analysed as
 # short-lived reports no issues at all, so a broken demo shows zero deviations
@@ -10,9 +12,9 @@
 #
 set -euo pipefail
 KEY="${1:-}"
-[ -n "$KEY" ] || { echo "usage: $0 <project-key>" >&2; exit 2; }
+HOST="${2:-https://sonarcloud.io}"
+[ -n "$KEY" ] || { echo "usage: $0 <project-key> [host-url]" >&2; exit 2; }
 [ -n "${SONAR_TOKEN:-}" ] || { echo "SONAR_TOKEN is not set" >&2; exit 2; }
-HOST="https://sonarcloud.io"
 ARCH_RULES="javaarchitecture:S7788,javaarchitecture:S7789,javaarchitecture:S8464,javaarchitecture:S8487"
 
 # branch -> expected architecture deviations
