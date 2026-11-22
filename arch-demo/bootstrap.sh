@@ -168,9 +168,30 @@ m=dict(json.load(open(sys.argv[1]))['models'][0])
 m['qualifiers'] = m.pop('type')
 json.dump({'projectId': sys.argv[2], 'model': {'perspectives': [m]}}, sys.stdout)" \
     "$REPO_DIR/arch-demo/intended-architecture.json" "$UUID" > /tmp/ia-payload.$$.json
-  curl -sSf -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' \
-    --data @/tmp/ia-payload.$$.json "$HOST/api/v2/architecture/models" >/dev/null \
-    && echo "    intended architecture written"
+  # POST creates and refuses if a model already exists ("A model already exists
+  # for project"); PATCH updates an existing one. Re-running the bootstrap is
+  # normal, so handle both.
+  EXISTING=$(api "v2/architecture/models?projectId=$UUID" 2>/dev/null | python3 -c "
+import json,sys
+try:
+    d=json.load(sys.stdin); print(d[0]['id'] if isinstance(d,list) and d else '')
+except Exception: print('')")
+  if [ -n "$EXISTING" ]; then
+    python3 -c "
+import json,sys
+d=json.load(open(sys.argv[1])); del d['projectId']
+json.dump(d, sys.stdout)" /tmp/ia-payload.$$.json > /tmp/ia-patch.$$.json
+    curl -sSf -u "$SONAR_TOKEN:" -X PATCH \
+      -H 'Content-Type: application/merge-patch+json' \
+      --data @/tmp/ia-patch.$$.json \
+      "$HOST/api/v2/architecture/models/$EXISTING" >/dev/null \
+      && echo "    intended architecture updated"
+    rm -f /tmp/ia-patch.$$.json
+  else
+    curl -sSf -u "$SONAR_TOKEN:" -H 'Content-Type: application/json' \
+      --data @/tmp/ia-payload.$$.json "$HOST/api/v2/architecture/models" >/dev/null \
+      && echo "    intended architecture written"
+  fi
   rm -f /tmp/ia-payload.$$.json
   # Read it back: a silently-empty model is the failure mode here.
   if ! curl -sS -u "$SONAR_TOKEN:" "$HOST/api/v2/architecture/models?projectId=$UUID" \
