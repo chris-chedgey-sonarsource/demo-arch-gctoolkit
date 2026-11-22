@@ -8,8 +8,48 @@ Run `./arch-demo/verify.sh <your-key>` and get three `ok` lines. If any branch r
 `SHORT`, or `all = 0`, the demo will show zeros everywhere and you will not notice during
 the demo. Two minutes now saves that.
 
+Decide which demo you are giving: **enforcement** (the model exists, show it catching a
+violation) or **creation** (build the model on screen). The bootstrap sets you up for the
+first; the next section covers resetting for the second.
+
 Open three tabs, one per branch, on `project/architecture/current`. Switching tabs is
 faster and calmer than using the branch selector live.
+
+## What the bootstrap leaves you, and when to reset
+
+**`bootstrap.sh` produces the project as it looks *after* the demo** — the intended
+architecture already defined, deviations already computed. That is what you want if you are
+showing an existing architecture being enforced.
+
+**If you want to create the architecture on screen, reset it first.** Go to the intended
+architecture page on `main` and delete the model, then in the demo use **Generate draft** to
+build it live.
+
+```
+Cloud  https://sonarcloud.io/project/architecture/intended?id=<key>
+Server <host>/project/architecture/intended?id=<key>
+```
+
+Three things to know before you do that:
+
+**There is one intended architecture per project, not per branch.** Deleting it on `main`
+deletes it for every branch. There is no way to have `main` without a model and the demo
+branches with one.
+
+**The deviations already on the branches survive the delete.** [measured 2026-11-22]
+Deleting the model does not recompute anything — findings are stored at analysis time. So
+after a reset, `demo-integration-parser-added` still shows its one deviation. That is what
+makes an interactive demo possible without rescanning: create the model live on `main`, then
+switch to the branch and the deviation is there.
+
+**But those deviations were computed against the model you deleted.** If what you author on
+screen differs from `arch-demo/intended-architecture.json`, the deviation page is telling you
+about the old model, not the new one. Either author the same five components and four
+relationships, or say plainly that deviations update at the next analysis. A sharp customer
+will ask.
+
+**To get back to the scripted state**, re-run `bootstrap.sh`. It recreates the model and
+rescans, taking about two minutes.
 
 ## The three beats
 
