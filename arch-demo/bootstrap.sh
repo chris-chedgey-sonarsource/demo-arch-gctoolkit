@@ -241,6 +241,22 @@ for b in "${BRANCHES[@]}"; do scan "$b" "$b"; done
 git -C "$REPO_DIR" checkout -q main
 
 echo
+# A scan uploads a report; the server ingests it asynchronously. Verifying straight
+# away reads a branch whose analysis has not landed yet, which looks exactly like a
+# branch that measured nothing - and the failure message then sends you chasing the
+# branch regex. Wait for the queue to drain first.
+echo "==> waiting for analysis to be processed"
+for _ in $(seq 1 60); do
+  q=$(api "ce/activity_status?component=$KEY" 2>/dev/null | python3 -c "
+import json,sys
+try:
+    d=json.load(sys.stdin); print(int(d.get('pending',0))+int(d.get('inProgress',0)))
+except Exception: print(1)")
+  [ "$q" = "0" ] && break
+  sleep 2
+done
+echo "    queue drained"
+
 echo "==> verifying"
 "$REPO_DIR/arch-demo/verify.sh" "$KEY" "$HOST"
 echo
