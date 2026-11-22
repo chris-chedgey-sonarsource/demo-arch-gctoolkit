@@ -38,25 +38,53 @@ changed and nothing else.
 
 ## Set up your own project
 
-You need a SonarQube Cloud token in `SONAR_TOKEN`, plus Java 17+, Maven and git.
+One command. It creates the project, writes the intended architecture, scans all three
+branches, and then **verifies the result** — because the one failure mode here is silent.
+
+### SonarQube Cloud
 
 ```bash
 git clone <this repo> demo-arch-gctoolkit
 cd demo-arch-gctoolkit
-export SONAR_TOKEN=<your token>
+export SONAR_TOKEN=<token from sonarcloud.io/account/security>
 ./arch-demo/bootstrap.sh <your-name> --org <your-organization>
 ```
 
-That creates the project, writes the intended architecture, scans all three branches, and
-then **verifies the result** — because the one failure mode here is silent (see below). It
-takes a few minutes, mostly Maven.
+### A local SonarQube Server
 
-The build normally downloads 362MB of GC test logs during `process-test-resources`.
-`bootstrap.sh` skips that (`-Dmaven.antrun.skip=true`) since it is test data the scan does
-not need — worth knowing if you build by hand on a conference network.
+```bash
+export SONAR_TOKEN=<token from your server>
+./arch-demo/bootstrap.sh <your-name> --instance sqs
+```
+
+Add `--sqs-url http://localhost:9010` if your server is not on the default port. There is no
+`--org` — SonarQube Server has no organizations.
+
+Your server needs an edition that includes Architecture; the script checks and tells you if
+not.
+
+### What you need either way
+
+git, Maven, a JDK 17+, and the SonarQube CLI
+(`brew install sonarsource/tap/sonarqube-cli`). The script checks all four before it creates
+anything, and proves your token works, so it fails in seconds rather than minutes into a
+build.
+
+It takes a few minutes, mostly Maven. The build normally downloads 362MB of GC test logs
+during `process-test-resources`; `bootstrap.sh` skips that, since it is test data the scan
+does not need. A first-ever build still has to fetch Maven's own plugins.
 
 Use your own project rather than a shared one: there is a single intended architecture per
 project, so two people demoing against the same project will interfere with each other.
+
+### Checking it again later
+
+```bash
+./arch-demo/verify.sh <project-key>                              # cloud
+./arch-demo/verify.sh <project-key> http://localhost:9000        # a local server
+```
+
+Three `ok` rows means the demo will behave as scripted.
 
 ## Running the demo
 
@@ -77,23 +105,33 @@ More convincing than switching branches, because the change is yours:
 ```bash
 git checkout main
 git diff main..demo-parser-integration-added     # the change to make
-# make it, then:
-mvn package sonar:sonar -Dsonar.projectKey=<your key> ...   # see bootstrap.sh
 ```
+
+Make it, then rescan. The simplest way is to re-run `bootstrap.sh` — it rescans all three
+branches and re-verifies. If you want to scan just the one branch, copy the `mvn` invocation
+from `arch-demo/bootstrap.sh`; the scanner plugin version differs between Cloud and Server,
+which is why it is worth copying rather than improvising.
 
 The deviation appears. Undo it, rescan, it goes.
 
 ## One thing that will bite you
 
-A SonarQube Cloud branch that does not match the project's long-lived-branch pattern is
-analysed as **short-lived**: it reports only *new* code, so architecture deviations do not
-appear at all. A demo set up that way shows zero deviations everywhere and looks like it is
-working.
+A branch that does not match the project's long-lived-branch pattern is analysed as
+**short-lived**: it reports only *new* code, so architecture deviations do not appear at all.
+A demo set up that way shows zero deviations everywhere and looks like it is working.
 
 `bootstrap.sh` sets the pattern to `(main|master|demo-.*)` **before** scanning anything, and
-`arch-demo/verify.sh` checks for it afterwards. If you set a project up by hand, do the same
-— and note that branch type is fixed at analysis time, so a branch analysed before the
-pattern was set must be deleted and rescanned.
+`verify.sh` checks afterwards. Branch type is fixed at analysis time, so a branch analysed
+before the pattern was set must be deleted and rescanned.
+
+Two smaller traps the scripts also handle, worth knowing if you set a project up by hand:
+
+- A scan without `sonar.branch.name` lands on the project's **default** branch, which is
+  called `master` whatever git calls it. `bootstrap.sh` renames it to `main`.
+- On SonarQube Server the intended architecture goes through the API rather than the CLI,
+  and the API uses a different shape from the CLI's file format. It **accepts the wrong
+  shape without complaining** and stores an empty model — which again reads as zero
+  deviations everywhere. `bootstrap.sh` reads the model back after writing it.
 
 ## Contents
 

@@ -37,8 +37,7 @@ usage: $0 <your-name> [--instance cloud|sqs] [--org <organization>] [--dry-run]
   SONAR_TOKEN must hold a user token for whichever instance you target.
   Cloud: https://sonarcloud.io/account/security
 
-  SonarQube Server needs Developer Edition or above - branch analysis and
-  architecture are both edition-gated, and this demo depends on branches.
+  SonarQube Server needs an edition that includes Architecture.
 USAGE
   exit 2
 }
@@ -107,8 +106,8 @@ else
   echo "    server up, edition: $EDITION"
   case "$EDITION" in
     community)
-      echo "    Community Edition has no branch analysis, which this demo needs." >&2
-      echo "    Use Developer Edition or above, or the cloud instance." >&2; exit 2 ;;
+      echo "    Community Edition does not include Architecture." >&2
+      echo "    Use an edition that does, or --instance cloud." >&2; exit 2 ;;
   esac
 fi
 
