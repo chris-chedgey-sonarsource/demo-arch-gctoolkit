@@ -1,79 +1,105 @@
-# Microsoft GCToolKit
+# SonarQube Architecture demo — gctoolkit
 
-GCToolkit is a set of libraries for analyzing HotSpot Java garbage collection (GC) log files. The toolkit parses GC log files into discrete events and provides an API for aggregating data from those events. This allows the user to create arbitrary and complex analyses of the state of managed memory in the Java Virtual Machine (JVM) represented by the garbage collection log.
+A real open-source Java project ([Microsoft GCToolKit](README-gctoolkit.md)) with an
+**intended architecture** defined in SonarQube, and two branches that show a dependency
+being introduced and then removed.
 
-For more detail you can read our [Launch Blog Post](https://devblogs.microsoft.com/java/introducing-microsoft-gctoolkit/).
+Use it to demonstrate, or to follow along yourself:
 
-[![GCToolKit build with Maven](https://github.com/microsoft/gctoolkit/actions/workflows/maven.yml/badge.svg)](https://github.com/microsoft/gctoolkit/actions/workflows/maven.yml)
+- what an intended architecture looks like on a real codebase
+- what happens when code crosses a boundary the architecture does not allow
+- that fixing the code clears the deviation
 
----
+## What the architecture says
 
-## Introduction
+Five modules. `gctoolkit-api` is the foundation and depends on nothing else; everything
+else depends on the api and **not on each other**:
 
-Managed memory in the Java Virtual Machine (JVM) is composed of 3 main pieces:
-
-1. Memory buffers known as Java heap
-1. Allocators which perform the work of getting data into Java heap
-1. Garbage Collection (GC).
-
-While GC is responsible for recovering memory in Java heap that is no longer in use, the term is often used as a euphemism for memory management. The phrasing of _Tuning GC_ or _tuning the collector_ are often used with the understanding that it refers to tuning the JVM’s memory management subsystem. The best source of telemetry data for tuning GC comes from GC Logs and GCToolKit has been helpful in making this task easier by providing parsers, models and an API to build analytics with. You can run the Maven project [HeapOccupancyAfterCollectionSummary sample](./sample/README.md) as an example of this.
-
-## Usage
-
-In order to use this library you'll need to add its dependencies to your project. We provide the instructions for Maven below.
-
-### Maven Coordinates
-
-[![Maven Central](https://img.shields.io/maven-central/v/com.microsoft.gctoolkit/gctoolkit-parser.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.microsoft.gctoolkit%22%20AND%20a:%22gctoolkit-api%22)
-
-The GCToolKit artifacts are in [Maven Central](https://search.maven.org/search?q=g:com.microsoft.gctoolkit). You'll then need to add the `api`, `parser` and `vertx` modules to your project in the `dependencyManagement` and/or `dependencies` section as you see fit.
-
-```xml
-<dependencies>
-    ...
-    
-    <dependency>
-        <groupId>com.microsoft.gctoolkit</groupId>
-        <artifactId>api</artifactId>
-        <version>3.0.4</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.microsoft.gctoolkit</groupId>
-        <artifactId>parser</artifactId>
-        <version>3.0.4</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.microsoft.gctoolkit</groupId>
-        <artifactId>vertx</artifactId>
-        <version>3.0.4</version>
-    </dependency>
-
-    ...
-</dependencies>
+```
+gctoolkit-parser       ──→ gctoolkit-api
+gctoolkit-vertx        ──→ gctoolkit-api
+gctoolkit-integration  ──→ gctoolkit-api
+gctoolkit-sample       ──→ gctoolkit-api
 ```
 
-## User Discussions
+The model is in [`arch-demo/intended-architecture.json`](arch-demo/intended-architecture.json).
+That is the whole thing — five components and four allowed dependencies.
 
-Meet other developers working with GCToolKit, ask questions, and participate in the development of this project by visiting the [Discussions](https://github.com/microsoft/gctoolkit/discussions) tab.
+## Branches
 
-### Example
+| Branch | Code | Deviations |
+|---|---|---|
+| `main` | upstream, untouched | **0** |
+| `demo-parser-integration-added` | the integration harness reaches into the parser | **1** |
+| `demo-parser-integration-removed` | that reference removed again | **0** |
 
-See the sample project: [sample/README](./sample/README.md)
+Each branch is a child of the one above it, so `git log` and `git diff` show exactly what
+changed and nothing else.
 
-## Contributing
+## Set up your own project
 
-See [CONTRIBUTING](CONTRIBUTING.md) for full details including more options for building and testing the project.
+You need a SonarQube Cloud token in `SONAR_TOKEN`, plus Java 17+, Maven and git.
 
-### Test Coverage Report
+```bash
+git clone <this repo> demo-arch-gctoolkit
+cd demo-arch-gctoolkit
+export SONAR_TOKEN=<your token>
+./arch-demo/bootstrap.sh <your-name> --org <your-organization>
+```
 
-**Core API Coverage** </br>![Coverage](.github/badges/jacoco-api-coverage.svg)
+That creates the project, writes the intended architecture, scans all three branches, and
+then **verifies the result** — because the one failure mode here is silent (see below). It
+takes a few minutes, mostly Maven.
 
-**Core :: Parser</br>**![Coverage::Core::Parser](.github/badges/jacoco-parser-coverage.svg)
+Use your own project rather than a shared one: there is a single intended architecture per
+project, so two people demoing against the same project will interfere with each other.
 
-**Core :: Vertx**</br>![Coverage::Core::Parser](.github/badges/jacoco-vertx-coverage.svg)
+## Running the demo
 
-## License
+Switch branches with the selector on the architecture pages. The story is three beats:
 
-Microsoft GCToolKit is licensed under the [MIT](https://github.com/microsoft/gctoolkit/blob/master/LICENSE) license.
+1. **`main`** — here is the intended architecture, and the code follows it. Nothing to fix.
+2. **`demo-parser-integration-added`** — someone made the integration harness use the
+   parser directly. One deviation, naming one file.
+3. **`demo-parser-integration-removed`** — two lines deleted. Clean again.
+
+Presenter notes, including what to say and the numbers to expect, are in
+[`arch-demo/DEMO.md`](arch-demo/DEMO.md).
+
+## Walking through it by hand
+
+More convincing than switching branches, because the change is yours:
+
+```bash
+git checkout main
+git diff main..demo-parser-integration-added     # the change to make
+# make it, then:
+mvn package sonar:sonar -Dsonar.projectKey=<your key> ...   # see bootstrap.sh
+```
+
+The deviation appears. Undo it, rescan, it goes.
+
+## One thing that will bite you
+
+A SonarQube Cloud branch that does not match the project's long-lived-branch pattern is
+analysed as **short-lived**: it reports only *new* code, so architecture deviations do not
+appear at all. A demo set up that way shows zero deviations everywhere and looks like it is
+working.
+
+`bootstrap.sh` sets the pattern to `(main|master|demo-.*)` **before** scanning anything, and
+`arch-demo/verify.sh` checks for it afterwards. If you set a project up by hand, do the same
+— and note that branch type is fixed at analysis time, so a branch analysed before the
+pattern was set must be deleted and rescanned.
+
+## Contents
+
+| | |
+|---|---|
+| `arch-demo/intended-architecture.json` | the model, as `sonar architecture intended set --file` expects it |
+| `arch-demo/bootstrap.sh` | create project, set the pattern, write the model, scan, verify |
+| `arch-demo/verify.sh` | check the demo is measuring what it should |
+| `arch-demo/DEMO.md` | presenter notes and expected numbers |
+| `README-gctoolkit.md` | the upstream project's own README |
+
+Everything under `arch-demo/` is demo scaffolding. The rest of the repository is GCToolKit,
+unmodified except on the two demo branches.

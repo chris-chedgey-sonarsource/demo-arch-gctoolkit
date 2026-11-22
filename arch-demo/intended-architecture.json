@@ -1,0 +1,43 @@
+{
+  "models": [
+    {
+      "language": "java",
+      "type": "namespace",
+      "label": "java Intended Model",
+      "description": "gctoolkit-api is the foundation. The parser, the messaging backplane, the integration harness and the sample all build on it and not on each other.",
+      "groups": [
+        {
+          "label": "gctoolkit-api",
+          "patterns": ["gctoolkit-api:**"],
+          "description": "Public model API: GC event types, JVM abstractions, timestamps and the aggregation SPI. The foundation the other modules build on."
+        },
+        {
+          "label": "gctoolkit-parser",
+          "patterns": ["gctoolkit-parser:**"],
+          "description": "Parses the supported GC log formats into the API's event model."
+        },
+        {
+          "label": "gctoolkit-vertx",
+          "patterns": ["gctoolkit-vertx:**"],
+          "description": "Messaging backplane connecting GC log parsers to JVM event consumers."
+        },
+        {
+          "label": "gctoolkit-integration",
+          "patterns": ["gctoolkit-integration:**"],
+          "description": "Integration-test harness that exercises the toolkit end to end, through the public API."
+        },
+        {
+          "label": "gctoolkit-sample",
+          "patterns": ["gctoolkit-sample:**"],
+          "description": "Sample application demonstrating how to consume the toolkit."
+        }
+      ],
+      "constraints": [
+        { "from": "gctoolkit-parser",      "to": "gctoolkit-api" },
+        { "from": "gctoolkit-vertx",       "to": "gctoolkit-api" },
+        { "from": "gctoolkit-integration", "to": "gctoolkit-api" },
+        { "from": "gctoolkit-sample",      "to": "gctoolkit-api" }
+      ]
+    }
+  ]
+}
