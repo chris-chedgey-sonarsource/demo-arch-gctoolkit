@@ -67,11 +67,15 @@ scan() { # $1 = git ref, $2 = optional sonar branch name
   # unbound under `set -u`, so main (no branch argument) would abort the run.
   local extra=()
   [ -n "${2:-}" ] && extra=(-Dsonar.branch.name="$2")
+  # maven.antrun.skip stops the gclogs module downloading 362MB of GC test logs
+  # in process-test-resources. It is test data only, nothing depends on the module,
+  # and we skip tests anyway - but on a fresh clone it otherwise dominates the run.
   # The plugin version is pinned deliberately: 5.1.x is the one that works against
   # SonarQube Cloud. Older 3.x/4.x bootstrap against different hosts.
   ( cd "$REPO_DIR" && mvn -B package \
       org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
       -DskipTests \
+      -Dmaven.antrun.skip=true \
       -Dsonar.token="$SONAR_TOKEN" \
       -Dsonar.host.url="$HOST" \
       -Dsonar.organization="$ORG" \

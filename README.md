@@ -51,6 +51,10 @@ That creates the project, writes the intended architecture, scans all three bran
 then **verifies the result** — because the one failure mode here is silent (see below). It
 takes a few minutes, mostly Maven.
 
+The build normally downloads 362MB of GC test logs during `process-test-resources`.
+`bootstrap.sh` skips that (`-Dmaven.antrun.skip=true`) since it is test data the scan does
+not need — worth knowing if you build by hand on a conference network.
+
 Use your own project rather than a shared one: there is a single intended architecture per
 project, so two people demoing against the same project will interfere with each other.
 
