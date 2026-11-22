@@ -70,9 +70,13 @@ git, Maven, a JDK 17+, and the SonarQube CLI
 anything, and proves your token works, so it fails in seconds rather than minutes into a
 build.
 
-It takes a few minutes, mostly Maven. The build normally downloads 362MB of GC test logs
-during `process-test-resources`; `bootstrap.sh` skips that, since it is test data the scan
-does not need. A first-ever build still has to fetch Maven's own plugins.
+**About two minutes**, including all three scans — measured from a completely empty Maven
+cache, which downloads 46MB. If you have built Java projects before, less.
+
+That number depends on one thing: the build normally fetches **362MB of GC test logs** during
+`process-test-resources`, which is eight times everything else put together. `bootstrap.sh`
+skips it, since it is test data the scan does not need. If you build by hand, pass
+`-Dmaven.antrun.skip=true` or expect a long wait.
 
 Use your own project rather than a shared one: there is a single intended architecture per
 project, so two people demoing against the same project will interfere with each other.
