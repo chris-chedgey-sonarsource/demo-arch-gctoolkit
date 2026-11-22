@@ -87,6 +87,14 @@ scan() { # $1 = git ref, $2 = optional sonar branch name
 }
 
 scan main
+
+# Scanning without sonar.branch.name lands on the project's default branch, which
+# SonarQube Cloud names "master" regardless of what git calls it. Rename it so the
+# UI matches the repository - otherwise the branch selector reads master/demo-*
+# and nothing corresponds to main.
+echo "==> renaming the main branch to match git"
+api project_branches/rename -X POST --data-urlencode "name=main" -d "project=$KEY" >/dev/null
+
 for b in "${BRANCHES[@]}"; do scan "$b" "$b"; done
 git -C "$REPO_DIR" checkout -q main
 
