@@ -34,8 +34,8 @@ echo "branch                            type   all  arch  expected"
 fail=0
 types=$(curl -sS -u "$SONAR_TOKEN:" "$HOST/api/project_branches/list?project=$KEY")
 for spec in "main:$EXPECT_main" \
-            "demo-parser-integration-added:$EXPECT_added" \
-            "demo-parser-integration-removed:$EXPECT_removed"; do
+            "demo-integration-parser-added:$EXPECT_added" \
+            "demo-integration-parser-removed:$EXPECT_removed"; do
   b="${spec%:*}"; want="${spec##*:}"
   t=$(printf '%s' "$types" | python3 -c "
 import json,sys

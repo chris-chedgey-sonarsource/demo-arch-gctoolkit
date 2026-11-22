@@ -116,7 +116,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [ "$INSTANCE" = "cloud" ]; then KEY="${ORG}_${OWNER}-gctoolkit-arch-demo"
 else KEY="${OWNER}-gctoolkit-arch-demo"; fi
 NAME="${OWNER}:arch-demo:gctoolkit"
-BRANCHES=(demo-parser-integration-added demo-parser-integration-removed)
+BRANCHES=(demo-integration-parser-added demo-integration-parser-removed)
 
 api() { curl -sS -u "$SONAR_TOKEN:" "$HOST/api/$1" "${@:2}"; }
 

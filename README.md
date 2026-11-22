@@ -30,8 +30,8 @@ That is the whole thing — five components and four allowed dependencies.
 | Branch | Code | Deviations |
 |---|---|---|
 | `main` | upstream, untouched | **0** |
-| `demo-parser-integration-added` | the integration harness reaches into the parser | **1** |
-| `demo-parser-integration-removed` | that reference removed again | **0** |
+| `demo-integration-parser-added` | the integration harness reaches into the parser | **1** |
+| `demo-integration-parser-removed` | that reference removed again | **0** |
 
 Each branch is a child of the one above it, so `git log` and `git diff` show exactly what
 changed and nothing else.
@@ -95,9 +95,9 @@ Three `ok` rows means the demo will behave as scripted.
 Switch branches with the selector on the architecture pages. The story is three beats:
 
 1. **`main`** — here is the intended architecture, and the code follows it. Nothing to fix.
-2. **`demo-parser-integration-added`** — someone made the integration harness use the
+2. **`demo-integration-parser-added`** — someone made the integration harness use the
    parser directly. One deviation, naming one file.
-3. **`demo-parser-integration-removed`** — two lines deleted. Clean again.
+3. **`demo-integration-parser-removed`** — two lines deleted. Clean again.
 
 Presenter notes, including what to say and the numbers to expect, are in
 [`arch-demo/DEMO.md`](arch-demo/DEMO.md).
@@ -108,7 +108,7 @@ More convincing than switching branches, because the change is yours:
 
 ```bash
 git checkout main
-git diff main..demo-parser-integration-added     # the change to make
+git diff main..demo-integration-parser-added     # the change to make
 ```
 
 Make it, then rescan. The simplest way is to re-run `bootstrap.sh` — it rescans all three

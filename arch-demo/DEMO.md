@@ -20,7 +20,7 @@ one sentence: *the api is the foundation, and nothing else depends on anything b
 Then show **zero deviations**. The point to land: this is not a report of problems, it is a
 statement of intent that the code currently satisfies.
 
-**2 — `demo-parser-integration-added`. Someone crossed a boundary.**
+**2 — `demo-integration-parser-added`. Someone crossed a boundary.**
 
 A fifth arrow appears: `gctoolkit-integration → gctoolkit-parser`. One deviation, and it
 names the file — `SharedAggregation.java`. Open it. The change is a field nobody uses:
@@ -33,7 +33,7 @@ Worth saying: no one did anything obviously wrong, and nothing is broken. The in
 harness is supposed to exercise the toolkit through its public API, and now it reaches past
 it. That is the kind of thing that is invisible in review and permanent once it spreads.
 
-**3 — `demo-parser-integration-removed`. Two lines, and it is gone.**
+**3 — `demo-integration-parser-removed`. Two lines, and it is gone.**
 
 Delete the field and its import. Rescan. Back to four arrows and zero deviations.
 
@@ -53,8 +53,8 @@ dependency weight is 1 and not 2.
 | Branch | Deviations | Rule |
 |---|---|---|
 | `main` | 0 | — |
-| `demo-parser-integration-added` | 1 | `javaarchitecture:S7788` disallowed dependency |
-| `demo-parser-integration-removed` | 0 | — |
+| `demo-integration-parser-added` | 1 | `javaarchitecture:S7788` disallowed dependency |
+| `demo-integration-parser-removed` | 0 | — |
 
 The deviation names `IT/src/main/java/com/microsoft/gctoolkit/integration/shared/SharedAggregation.java`
 and reports a dependency count of 1.
