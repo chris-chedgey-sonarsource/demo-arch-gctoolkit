@@ -11,7 +11,7 @@
 set -euo pipefail
 
 OWNER="${1:-}"; shift || true
-ORG="the-dna-squad"
+ORG=""
 DRY_RUN=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -21,8 +21,55 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-[ -n "$OWNER" ] || { echo "usage: $0 <your-name> [--org <organization>] [--dry-run]" >&2; exit 2; }
-[ -n "${SONAR_TOKEN:-}" ] || { echo "SONAR_TOKEN is not set" >&2; exit 2; }
+usage() {
+  cat >&2 <<USAGE
+usage: $0 <your-name> --org <organization> [--dry-run]
+
+  <your-name>   short name, used in the project name and key (e.g. alice)
+  --org         your SonarQube Cloud organization key
+
+  SONAR_TOKEN must hold a SonarQube Cloud user token:
+  https://sonarcloud.io/account/security
+USAGE
+  exit 2
+}
+[ -n "$OWNER" ] || usage
+# No default organization on purpose: a default would quietly create projects in
+# someone else's organization.
+[ -n "$ORG" ] || { echo "--org is required" >&2; usage; }
+[ -n "${SONAR_TOKEN:-}" ] || { echo "SONAR_TOKEN is not set" >&2; usage; }
+
+# Fail in seconds rather than minutes deep inside Maven.
+echo "==> checking prerequisites"
+missing=0
+for c in git mvn java sonar; do
+  if command -v "$c" >/dev/null 2>&1; then
+    printf '    %-6s ok\n' "$c"
+  else
+    printf '    %-6s MISSING\n' "$c"; missing=1
+  fi
+done
+if [ "$missing" = 1 ]; then
+  cat >&2 <<'NEED'
+
+  git, Maven and a JDK 17+ are needed to build and scan.
+  The SonarQube CLI writes the intended architecture:
+      brew install sonarsource/tap/sonarqube-cli
+  Without it the scan runs with no architecture defined and every branch
+  reports zero deviations, which looks like the demo working.
+NEED
+  exit 2
+fi
+
+# One call that proves the token works and the organization is reachable.
+if ! curl -sSf -u "$SONAR_TOKEN:" \
+     "https://sonarcloud.io/api/organizations/search?organizations=$ORG" \
+     | grep -q "\"key\":\"$ORG\""; then
+  echo "    cannot see organization '$ORG' with this token" >&2
+  echo "    check the key at https://sonarcloud.io and that the token is valid" >&2
+  exit 2
+fi
+echo "    token + org ok"
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KEY="${ORG}_${OWNER}-gctoolkit-arch-demo"
@@ -53,12 +100,8 @@ api settings/set -X POST \
   -d "component=$KEY" >/dev/null
 
 echo "==> intended architecture"
-if command -v sonar >/dev/null 2>&1; then
-  SONARQUBE_CLI_TOKEN="$SONAR_TOKEN" SONARQUBE_CLI_ORG="$ORG" \
-    sonar architecture intended set -p "$KEY" --file "$REPO_DIR/arch-demo/intended-architecture.json"
-else
-  echo "    (sonar CLI not found - write arch-demo/intended-architecture.json via the UI or MCP)"
-fi
+SONARQUBE_CLI_TOKEN="$SONAR_TOKEN" SONARQUBE_CLI_ORG="$ORG" \
+  sonar architecture intended set -p "$KEY" --file "$REPO_DIR/arch-demo/intended-architecture.json"
 
 scan() { # $1 = git ref, $2 = optional sonar branch name
   echo "==> scanning $1"
