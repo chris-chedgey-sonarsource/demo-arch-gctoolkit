@@ -65,14 +65,19 @@ scan() { # $1 = git ref, $2 = optional sonar branch name
   git -C "$REPO_DIR" checkout -q "$1"
   local extra=()
   [ -n "${2:-}" ] && extra=(-Dsonar.branch.name="$2")
-  ( cd "$REPO_DIR" && mvn -q -B package sonar:sonar \
-      -Dsonar.scanner.skipJreProvisioning=true \
+  # The plugin version is pinned deliberately: 5.1.x is the one that works against
+  # SonarQube Cloud. Older 3.x/4.x bootstrap against different hosts.
+  ( cd "$REPO_DIR" && mvn -B package \
+      org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
+      -DskipTests \
+      -Dsonar.token="$SONAR_TOKEN" \
       -Dsonar.host.url="$HOST" \
       -Dsonar.organization="$ORG" \
-      -Dsonar.token="$SONAR_TOKEN" \
       -Dsonar.projectKey="$KEY" \
       -Dsonar.projectName="$NAME" \
-      -DskipTests "${extra[@]}" )
+      -Dsonar.scanner.sonarcloudUrl="$HOST" \
+      -Dsonar.scanner.apiBaseUrl="https://api.sonarcloud.io" \
+      "${extra[@]}" )
 }
 
 scan main
