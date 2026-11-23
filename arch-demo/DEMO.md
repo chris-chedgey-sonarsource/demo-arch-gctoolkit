@@ -30,6 +30,17 @@ Cloud  https://sonarcloud.io/project/architecture/intended?id=<key>
 Server <host>/project/architecture/intended?id=<key>
 ```
 
+**Rule of thumb: only generate the intended architecture from `main`.**
+
+There is no reason to do it anywhere else — the intended architecture is a single
+project-level artefact, so generating it on `main` gives every branch its model. Generate
+draft also always reads **main's** current architecture whatever branch the URL names, so
+generating it from another branch produces a model that does not reflect that branch's code.
+Confusing for you, and more so for an audience.
+
+The current architecture and the deviations *are* per-branch. That is why one model, written
+once, produces different deviations on each branch — and why this demo works at all.
+
 Three things to know before you do that:
 
 **There is one intended architecture per project, not per branch.** Deleting it on `main`
