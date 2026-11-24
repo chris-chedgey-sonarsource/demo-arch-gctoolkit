@@ -145,6 +145,7 @@ Two smaller traps the scripts also handle, worth knowing if you set a project up
 | `arch-demo/bootstrap.sh` | create project, set the pattern, write the model, scan, verify |
 | `arch-demo/verify.sh` | check the demo is measuring what it should |
 | `arch-demo/DEMO.md` | presenter notes and expected numbers |
+| `arch-demo/walkthrough.mp4` | a recording of the demo being given |
 | `README-gctoolkit.md` | the upstream project's own README |
 
 Everything under `arch-demo/` is demo scaffolding. The rest of the repository is GCToolKit,
