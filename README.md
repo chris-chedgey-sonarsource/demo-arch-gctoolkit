@@ -1,10 +1,10 @@
 # SonarQube Architecture Workshop — Microsoft GCToolKit
 
-A real open-source Java project ([Microsoft GCToolKit](README-gctoolkit.md)) with an
+A real, open source Java project ([Microsoft GCToolKit](README-gctoolkit.md)) with an
 **intended architecture** defined in SonarQube, and two branches that show a dependency
 being introduced and then removed.
 
-Use it to demonstrate, or to follow along yourself:
+Follow along to learn:
 
 - what an intended architecture looks like on a real codebase
 - what happens when code crosses a boundary the architecture does not allow
@@ -12,8 +12,8 @@ Use it to demonstrate, or to follow along yourself:
 
 ## What the architecture says
 
-Five modules. `gctoolkit-api` is the foundation and depends on nothing else; everything
-else depends on the api and **not on each other**:
+In this project there are five modules; `gctoolkit-api` is the foundation and depends on nothing else, while everything
+else depends on the api (but **not on each other**):
 
 ```
 gctoolkit-parser       ──→ gctoolkit-api
@@ -22,8 +22,7 @@ gctoolkit-integration  ──→ gctoolkit-api
 gctoolkit-sample       ──→ gctoolkit-api
 ```
 
-The model is in [`arch-demo/intended-architecture.json`](arch-demo/intended-architecture.json).
-That is the whole thing — five components and four allowed dependencies.
+The model is in [`arch-demo/intended-architecture.json`](arch-demo/intended-architecture.json) and comprises five components and four allowed dependencies.
 
 ## Branches
 
