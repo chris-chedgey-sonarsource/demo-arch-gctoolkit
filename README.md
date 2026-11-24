@@ -1,4 +1,4 @@
-# SonarQube Architecture demo — gctoolkit
+# SonarQube Architecture Workshop — Microsoft GCToolKit
 
 A real open-source Java project ([Microsoft GCToolKit](README-gctoolkit.md)) with an
 **intended architecture** defined in SonarQube, and two branches that show a dependency
