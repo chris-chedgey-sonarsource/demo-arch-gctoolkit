@@ -1,6 +1,6 @@
 # Presenter notes
 
-Internal. The customer-facing version is [`../README.md`](../README.md).
+How to give the demo. For setting it up, see [`../README.md`](../README.md).
 
 **[Watch the walkthrough](https://www.loom.com/share/2afd04d7ffa34604b1543d11380f31ca)** —
 the demo as given, start to finish. Worth watching once before presenting it yourself; the
