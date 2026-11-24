@@ -2,13 +2,11 @@
 
 How to give the demo. For setting it up, see [`../README.md`](../README.md).
 
-**The demo as given, start to finish.** Worth watching once before presenting it yourself;
-the notes below are the detail behind it rather than a substitute.
-
-https://github.com/user-attachments/assets/f76a7901-d35d-476c-a2b8-82a2a910bcfe
-
-Also available [as a download](walkthrough.mp4), or
-[on Loom](https://www.loom.com/share/2afd04d7ffa34604b1543d11380f31ca) for Sonar colleagues.
+**[The walkthrough](walkthrough.mp4)** — the demo as given, start to finish. Worth watching
+once before presenting it yourself; the notes below are the detail behind it rather than a
+substitute. GitHub serves it as a download rather than playing it in the browser.
+Sonar colleagues can also watch it
+[on Loom](https://www.loom.com/share/2afd04d7ffa34604b1543d11380f31ca).
 
 ## Before you start
 
