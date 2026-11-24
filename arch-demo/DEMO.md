@@ -2,6 +2,10 @@
 
 Internal. The customer-facing version is [`../README.md`](../README.md).
 
+**[Watch the walkthrough](https://www.loom.com/share/2afd04d7ffa34604b1543d11380f31ca)** —
+the demo as given, start to finish. Worth watching once before presenting it yourself; the
+notes below are the detail behind it rather than a substitute.
+
 ## Before you start
 
 Run `./arch-demo/verify.sh <your-key>` and get three `ok` lines. If any branch reports
@@ -11,9 +15,6 @@ the demo. Two minutes now saves that.
 Decide which demo you are giving: **enforcement** (the model exists, show it catching a
 violation) or **creation** (build the model on screen). The bootstrap sets you up for the
 first; the next section covers resetting for the second.
-
-Open three tabs, one per branch, on `project/architecture/current`. Switching tabs is
-faster and calmer than using the branch selector live.
 
 ## What the bootstrap leaves you, and when to reset
 
