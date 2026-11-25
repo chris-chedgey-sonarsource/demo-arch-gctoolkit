@@ -8,7 +8,7 @@ Follow along to learn:
 
 - what an intended architecture looks like on a real codebase
 - what happens when code crosses a boundary the architecture does not allow
-- that fixing the code clears the deviation
+- how fixing the code resolves the deviation
 
 ## What the architecture says
 
