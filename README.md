@@ -12,7 +12,7 @@ Follow along to learn:
 
 ## What the architecture says
 
-In this project there are five modules; `gctoolkit-api` is the foundation and depends on nothing else, while everything
+In this project there are five modules; `gctoolkit-api` forms the foundation and depends on nothing else, while everything
 else depends on the api (but **not on each other**):
 
 ```
@@ -67,71 +67,54 @@ git, Maven, a JDK 17+, and the SonarQube CLI
 (`brew install sonarsource/tap/sonarqube-cli`). The script checks for all four before it creates
 anything, and determines whether or not your token works. 
 
-**About two minutes**, including all three scans — measured from a completely empty Maven
-cache, which downloads 46MB. If you have built Java projects before, less.
-
-That number depends on one thing: the build normally fetches **362MB of GC test logs** during
-`process-test-resources`, which is eight times everything else put together. `bootstrap.sh`
-skips it, since it is test data the scan does not need. If you build by hand, pass
-`-Dmaven.antrun.skip=true` or expect a long wait.
-
-Use your own project rather than a shared one: there is a single intended architecture per
-project, so two people demoing against the same project will interfere with each other.
-
 ### Checking it again later
 
 ```bash
 ./arch-demo/verify.sh <project-key>                              # cloud
-./arch-demo/verify.sh <project-key> http://localhost:9000        # a local server
+./arch-demo/verify.sh <project-key> http://localhost:9000        # server
 ```
 
-Three `ok` rows means the demo will behave as scripted.
+Three `ok` rows indicates that your implementation will behave as intended.
 
 ## Running the demo
 
-Switch branches with the selector on the architecture pages. The story is three beats:
+Switch branches with the selector on the architecture pages.
 
-1. **`main`** — here is the intended architecture, and the code follows it. Nothing to fix.
+1. **`main`** — here is the intended architecture, and the code follows it (nothing to fix).
 2. **`demo-integration-parser-added`** — someone made the integration harness use the
-   parser directly. One deviation, naming one file.
-3. **`demo-integration-parser-removed`** — two lines deleted. Clean again.
-
-Presenter notes, including what to say and the numbers to expect, are in
-[`arch-demo/DEMO.md`](arch-demo/DEMO.md).
+   parser directly (one deviation, naming one file).
+3. **`demo-integration-parser-removed`** — two lines deleted (clean again).
 
 ## Walking through it by hand
-
-More convincing than switching branches, because the change is yours:
 
 ```bash
 git checkout main
 git diff main..demo-integration-parser-added     # the change to make
 ```
 
-Make it, then rescan. The simplest way is to re-run `bootstrap.sh` — it rescans all three
+Make the change, then rescan. The simplest way is to re-run `bootstrap.sh` as it rescans all three
 branches and re-verifies. If you want to scan just the one branch, copy the `mvn` invocation
 from `arch-demo/bootstrap.sh`; the scanner plugin version differs between Cloud and Server,
 which is why it is worth copying rather than improvising.
 
-The deviation appears. Undo it, rescan, it goes.
+The deviation appears. Undo it, rescan, and watch it go.
 
-## One thing that will bite you
+> Callouts
 
-A branch that does not match the project's long-lived-branch pattern is analysed as
+A branch that does not match the project's long-lived branch pattern is analyzed as
 **short-lived**: it reports only *new* code, so architecture deviations do not appear at all.
-A demo set up that way shows zero deviations everywhere and looks like it is working.
+A demo set up that way shows zero deviations everywhere and looks as though it's working.
 
 `bootstrap.sh` sets the pattern to `(main|master|demo-.*)` **before** scanning anything, and
-`verify.sh` checks afterwards. Branch type is fixed at analysis time, so a branch analysed
+`verify.sh` checks afterwards. Branch type is fixed at analysis time, so a branch analyzed
 before the pattern was set must be deleted and rescanned.
 
-Two smaller traps the scripts also handle, worth knowing if you set a project up by hand:
+Two smaller traps the scripts also handle, worth knowing if you set up a project up by hand:
 
-- A scan without `sonar.branch.name` lands on the project's **default** branch, which is
-  called `master` whatever git calls it. `bootstrap.sh` renames it to `main`.
+- A scan without `sonar.branch.name` lands on the project's **default** branch; `bootstrap.sh` renames it to `main`.
 - On SonarQube Server the intended architecture goes through the API rather than the CLI,
   and the API uses a different shape from the CLI's file format. It **accepts the wrong
-  shape without complaining** and stores an empty model — which again reads as zero
+  shape without complaining** and stores an empty model, which again reads as zero
   deviations everywhere. `bootstrap.sh` reads the model back after writing it.
 
 ## Contents
@@ -141,7 +124,6 @@ Two smaller traps the scripts also handle, worth knowing if you set a project up
 | `arch-demo/intended-architecture.json` | the model, as `sonar architecture intended set --file` expects it |
 | `arch-demo/bootstrap.sh` | create project, set the pattern, write the model, scan, verify |
 | `arch-demo/verify.sh` | check the demo is measuring what it should |
-| `arch-demo/DEMO.md` | presenter notes and expected numbers |
 | `arch-demo/walkthrough.mp4` | a recording of the demo being given |
 | `README-gctoolkit.md` | the upstream project's own README |
 
