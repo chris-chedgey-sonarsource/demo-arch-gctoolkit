@@ -37,8 +37,8 @@ changed.
 
 ## Set up your own project
 
-Run the following to create the project, writes the intended architecture, scans all three
-branches, and then **verifies the result** (the one failure mode here is silent).
+Run the following to create the project, write the intended architecture, scan all three
+branches, and then **verify the result** (the one failure mode here is silent).
 
 ### SonarQube Cloud
 
