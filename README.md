@@ -74,7 +74,7 @@ anything, and determines whether or not your token works.
 ./arch-demo/verify.sh <project-key> http://localhost:9000        # server
 ```
 
-Three `ok` rows indicates that your implementation will behave as intended.
+Three `ok` rows indicate that your implementation will behave as intended.
 
 ## Running the demo
 
@@ -122,9 +122,9 @@ Two smaller traps the scripts also handle, worth knowing if you set up a project
 | | |
 |---|---|
 | `arch-demo/intended-architecture.json` | the model, as `sonar architecture intended set --file` expects it |
-| `arch-demo/bootstrap.sh` | create project, set the pattern, write the model, scan, verify |
+| `arch-demo/bootstrap.sh` | create the project, set the pattern, write the model, scan, verify |
 | `arch-demo/verify.sh` | check the demo is measuring what it should |
-| `arch-demo/walkthrough.mp4` | a recording of the demo being given |
+| `arch-demo/walkthrough.mp4` | a recording of the demo being presented |
 | `README-gctoolkit.md` | the upstream project's own README |
 
 Everything under `arch-demo/` is demo scaffolding. The rest of the repository is GCToolKit,
