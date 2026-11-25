@@ -22,7 +22,7 @@ gctoolkit-integration  ──→ gctoolkit-api
 gctoolkit-sample       ──→ gctoolkit-api
 ```
 
-The model is in [`arch-demo/intended-architecture.json`](arch-demo/intended-architecture.json) and comprises five components and four allowed dependencies.
+The model is defined in [`arch-demo/intended-architecture.json`](arch-demo/intended-architecture.json) and comprises five components and four allowed dependencies.
 
 ## Branches
 
@@ -30,15 +30,15 @@ The model is in [`arch-demo/intended-architecture.json`](arch-demo/intended-arch
 |---|---|---|
 | `main` | upstream, untouched | **0** |
 | `demo-integration-parser-added` | the integration harness reaches into the parser | **1** |
-| `demo-integration-parser-removed` | that reference removed again | **0** |
+| `demo-integration-parser-removed` | that reference, removed | **0** |
 
-Each branch is a child of the one above it, so `git log` and `git diff` show exactly what
-changed and nothing else.
+Each branch is a child of the one above it, so `git log` and `git diff` show what
+changed.
 
 ## Set up your own project
 
-One command. It creates the project, writes the intended architecture, scans all three
-branches, and then **verifies the result** — because the one failure mode here is silent.
+Run the following to create the project, writes the intended architecture, scans all three
+branches, and then **verifies the result** (the one failure mode here is silent).
 
 ### SonarQube Cloud
 
@@ -49,25 +49,23 @@ export SONAR_TOKEN=<token from sonarcloud.io/account/security>
 ./arch-demo/bootstrap.sh <your-name> --org <your-organization>
 ```
 
-### A local SonarQube Server
+### SonarQube Server
 
 ```bash
 export SONAR_TOKEN=<token from your server>
 ./arch-demo/bootstrap.sh <your-name> --instance sqs
 ```
 
-Add `--sqs-url http://localhost:9010` if your server is not on the default port. There is no
-`--org` — SonarQube Server has no organizations.
+Add `--sqs-url http://localhost:9010` if your server is not on the default port.
 
-Your server needs an edition that includes Architecture; the script checks and tells you if
+Your server requires an edition that includes Architecture; the script checks for this and tells you if
 not.
 
 ### What you need either way
 
 git, Maven, a JDK 17+, and the SonarQube CLI
-(`brew install sonarsource/tap/sonarqube-cli`). The script checks all four before it creates
-anything, and proves your token works, so it fails in seconds rather than minutes into a
-build.
+(`brew install sonarsource/tap/sonarqube-cli`). The script checks for all four before it creates
+anything, and determines whether or not your token works. 
 
 **About two minutes**, including all three scans — measured from a completely empty Maven
 cache, which downloads 46MB. If you have built Java projects before, less.
