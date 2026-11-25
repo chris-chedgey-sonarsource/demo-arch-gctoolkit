@@ -30,7 +30,7 @@ The model is defined in [`arch-demo/intended-architecture.json`](arch-demo/inten
 |---|---|---|
 | `main` | upstream, untouched | **0** |
 | `demo-integration-parser-added` | the integration harness reaches into the parser | **1** |
-| `demo-integration-parser-removed` | that reference, removed | **0** |
+| `demo-integration-parser-removed` | that reference, now removed | **0** |
 
 Each branch is a child of the one above it, so `git log` and `git diff` show what
 changed.
@@ -99,7 +99,7 @@ which is why it is worth copying rather than improvising.
 
 The deviation appears. Undo it, rescan, and watch it go.
 
-> Callouts
+> Important callouts
 
 A branch that does not match the project's long-lived branch pattern is analyzed as
 **short-lived**: it reports only *new* code, so architecture deviations do not appear at all.
